@@ -1,3 +1,5 @@
+# Copyright Taiyo 11-13-26 
+# Attaches to the same stream through PipeWire, scales frames to 32×24, and prints a center-weighted luminance value once per sample interval.
 #!/usr/bin/env python3
 """Attach to the camera stream through PipeWire and print a center-weighted
 mean luminance (0-255) once per interval. One value per line on stdout."""
@@ -10,7 +12,7 @@ gi.require_version("Gst", "1.0")
 from gi.repository import Gst  # noqa: E402
 
 W, H = 32, 24
-# Weight the middle of the frame (where a face usually is) over the edges.
+# Weight the middle of the frame over the edges. (assuming the user's face is in the center)
 WEIGHTS = [
     1.0 if (W // 4 <= x < 3 * W // 4 and H // 6 <= y < 5 * H // 6) else 0.25
     for y in range(H)
