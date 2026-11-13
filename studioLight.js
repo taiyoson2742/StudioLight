@@ -1,6 +1,5 @@
-/* extension.js - Studio Light
- * SPDX-License-Identifier: GPL-2.0-or-later
- */
+//last updated 11-12-26 
+//copyright Taiyo
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
@@ -19,7 +18,7 @@ const ICON = 'display-brightness-symbolic';
 const POLL_SECONDS = 3;
 const HELPER_NAME = 'studiolight';
 const SHUTTER_LUMA = 2;      // readings below this are treated as a closed shutter
-const HYSTERESIS = 3;        // minimum change (%) before we retarget
+const HYSTERESIS = 3;        // minimum change (%) before retarget
 const ANIM_STEP = 2;         // % per animation tick
 const ANIM_MS = 80;
 
@@ -53,12 +52,9 @@ class Brightness {
     }
 }
 
-/* ------------------------------------------------------------ camera in use? */
+//checks if camera is in use (true if it is)
 
-/**
- * True if some client other than our own helper has an active link from a
- * Video/Source node (i.e. an app is streaming from the camera).
- */
+
 function cameraInUse(pwDumpJson) {
     const objs = JSON.parse(pwDumpJson);
     const nodes = new Map();
@@ -81,7 +77,7 @@ function cameraInUse(pwDumpJson) {
     return false;
 }
 
-/* ---------------------------------------------------------------- controller */
+//brightness controller
 
 class Controller {
     constructor(path, settings, onState) {
@@ -97,7 +93,7 @@ class Controller {
         this._active = false;
 
         this._baseline = null;   // the user's own brightness
-        this._lastSet = null;    // last value we wrote
+        this._lastSet = null;    // last value written
         this._target = null;
         this._ema = null;
         this._animId = 0;
@@ -122,7 +118,7 @@ class Controller {
         }
     }
 
-    /* -- lifecycle -- */
+//lifecycles
 
     _recoverFromCrash() {
         const saved = this._settings.get_int('saved-brightness');
@@ -183,7 +179,7 @@ class Controller {
         }
     }
 
-    /* -- session (camera in use) -- */
+//camera in use session
 
     async _beginSession() {
         this._active = true;
@@ -219,7 +215,7 @@ class Controller {
             this._onState('waiting');
     }
 
-    /* -- helper process -- */
+//helper process
 
     _launchHelper() {
         if (this._helper)
@@ -260,7 +256,7 @@ class Controller {
             this._helper = null;
     }
 
-    /* -- brightness logic -- */
+    //brightness logic
 
     _desiredTarget(luma) {
         const l = luma / 255;
@@ -320,19 +316,19 @@ class Controller {
     }
 }
 
-/* ----------------------------------------------------------------------- UI */
+//the gui
 
 const StudioLightToggle = GObject.registerClass(
 class StudioLightToggle extends QuickMenuToggle {
     constructor(extension, settings) {
         super({
-            title: _('Studio Light'),
+            title: _('StudioLight'),
             iconName: ICON,
             toggleMode: true,
         });
 
-        this.menu.setHeader(ICON, _('Studio Light'),
-            _('Brightens the screen in dim rooms while the camera is in use'));
+        this.menu.setHeader(ICON, _('StudioLight'),
+            _('Brightens the screen when camera is being used in dim room for better quality output'));
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem(_('Sensitivity')));
         const sliderItem = new PopupMenu.PopupBaseMenuItem({activate: false});
@@ -364,7 +360,7 @@ class StudioLightIndicator extends SystemIndicator {
         this._indicator.visible = state === 'active';
         switch (state) {
         case 'active':
-            this._toggle.subtitle = _('Camera in use');
+            this._toggle.subtitle = _('Camera already in use');
             break;
         case 'waiting':
             this._toggle.subtitle = _('Waiting for camera');
@@ -375,7 +371,7 @@ class StudioLightIndicator extends SystemIndicator {
     }
 });
 
-/* ---------------------------------------------------------------- extension */
+
 
 export default class StudioLightExtension extends Extension {
     enable() {
