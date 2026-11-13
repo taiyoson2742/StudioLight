@@ -1,0 +1,8 @@
+{
+  "uuid": "studio-light@example.com",
+  "name": "Studio Light",
+  "description": "Raises screen brightness in dim rooms while the camera is in use, so you stay well lit on video calls.",
+  "shell-version": ["45", "46", "47", "48", "49"],
+  "settings-schema": "org.gnome.shell.extensions.studio-light",
+  "url": ""
+}
